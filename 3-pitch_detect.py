@@ -32,5 +32,6 @@ features = analyzeAudio(audioPath)
 plotAudioVals(features,audioPath,'pYIN fundamental frequency estimation','f0')
 
 clean_f0 = np.nan_to_num (features['f0'], nan=features['f0mean'])
+print ("f0:")
 print (clean_f0)
 
