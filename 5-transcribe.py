@@ -14,7 +14,6 @@ def analyzeAudio(audioPath):
 
   return audioVals, sr
 
-
 def getOnsetsEnv(sig,sr=44100):
     o_env = librosa.onset.onset_strength(y=sig, sr=sr)
     times = librosa.frames_to_time(np.arange(len(o_env)), sr=sr)
@@ -53,7 +52,7 @@ def plotAudioVals(audioVals,audioPath,plotTitle,dataName):
   plt.show()
   return
 
-audioPath = 'files/vocalise.wav'
+audioPath = 'files/trumpet.wav'
 
 features, sr = analyzeAudio(audioPath)
 plotAudioVals(features,audioPath,'pYIN fundamental frequency estimation','f0')
@@ -86,11 +85,17 @@ MyMIDI = MIDIFile(1)  # One track, defaults to format 1 (tempo track is created
 MyMIDI.addTempo(track, time, tempo)
 
 midi_old = 0
+onset_old = -1000
+timegate = .1 # seconds
 for i, pitch in enumerate(notes.astype(int)):
-    duration = 1
-    midi_time = onsets[i]
-    MyMIDI.addNote(track, channel, pitch, midi_time, midi_time - midi_old, 100)
-    midi_old = midi_time
+    print (onsets[i] - onset_old)
+    if onsets[i] - onset_old > timegate:
+      print ("\ttaken")
+      midi_time = onsets[i]
+      MyMIDI.addNote(track, channel, pitch, midi_time, midi_time - midi_old, 100)
+      midi_old = midi_time
+    
+    onset_old = onsets[i]
 
 with open("transcription.mid", "wb") as output_file:
     MyMIDI.writeFile(output_file)
