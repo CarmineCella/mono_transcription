@@ -37,9 +37,7 @@ def getOnsetsWrapper(filename):
     
     # estimate onsets from an onset envelope
     onset_frames = getOnsetsEnv(sig,sr)
-    print('Estimated onsets:')
     estimated = librosa.frames_to_time(onset_frames, sr=sr)
-    print(estimated)
     return estimated
 
 def plotAudioVals(audioVals,audioPath,plotTitle,dataName):
@@ -55,20 +53,24 @@ def plotAudioVals(audioVals,audioPath,plotTitle,dataName):
   plt.show()
   return
 
-audioPath = 'files/Vox.wav'
+audioPath = 'files/vocalise.wav'
 
 features, sr = analyzeAudio(audioPath)
 plotAudioVals(features,audioPath,'pYIN fundamental frequency estimation','f0')
 clean_f0 = np.nan_to_num (features['f0'], nan=features['f0mean'])
+
+print ("MIDI pitches: ")
 pitches = librosa.hz_to_midi (clean_f0)
 
 onsets = getOnsetsWrapper (audioPath)
+print ("onsets in sec.:")
 print (onsets)
 
 # hop size is 512
 locations = onsets*sr/512
 
 notes = pitches[locations.astype(int)]  
+print ("MIDI pitches and corresponding notes on onsets: ")
 print (notes)
 print (librosa.midi_to_note (notes))
 
