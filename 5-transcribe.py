@@ -1,16 +1,16 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import librosa
+from midiutil import MIDIFile
 
 def analyzeAudio(audioPath):
   audioVals = {}
   y, sr = librosa.load(audioPath)
-  audioVals['specCent'] =librosa.feature.spectral_centroid(y=y, sr=sr, n_fft=2048, hop_length=512, freq=None).transpose ()
-
   audioVals['f0'], voiced_flag, audioVals['voiced_probs'] = librosa.pyin(y,
                                               fmin=librosa.note_to_hz('C2'),
                                               fmax=librosa.note_to_hz('C7'))
   audioVals['f0mean'] = np.nanmean(audioVals['f0'])
+  audioVals['rms'] = librosa.feature.rms (y=y).transpose ()
 
   return audioVals, sr
 
@@ -55,15 +55,43 @@ def plotAudioVals(audioVals,audioPath,plotTitle,dataName):
   plt.show()
   return
 
-audioPath = 'files/trumpet.wav'
+audioPath = 'files/Vox.wav'
 
 features, sr = analyzeAudio(audioPath)
 plotAudioVals(features,audioPath,'pYIN fundamental frequency estimation','f0')
+clean_f0 = np.nan_to_num (features['f0'], nan=features['f0mean'])
+pitches = librosa.hz_to_midi (clean_f0)
 
 onsets = getOnsetsWrapper (audioPath)
 print (onsets)
 
+# hop size is 512
+locations = onsets*sr/512
+
+notes = pitches[locations.astype(int)]  
+print (notes)
+print (librosa.midi_to_note (notes))
+
+volumes = features['rms'][locations.astype (int)]
+
+track    = 0
+channel  = 0
+time     = 0
+tempo    = 60
+
+MyMIDI = MIDIFile(1)  # One track, defaults to format 1 (tempo track is created
+                      # automatically)
+MyMIDI.addTempo(track, time, tempo)
+
+midi_old = 0
+for i, pitch in enumerate(notes.astype(int)):
+    duration = 1
+    midi_time = onsets[i]
+    MyMIDI.addNote(track, channel, pitch, midi_time, midi_time - midi_old, 100)
+    midi_old = midi_time
+
+with open("transcription.mid", "wb") as output_file:
+    MyMIDI.writeFile(output_file)
+
+
 print ("to be continued...")
-
-
-

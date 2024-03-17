@@ -5,8 +5,6 @@ import librosa
 def analyzeAudio(audioPath):
   audioVals = {}
   y, sr = librosa.load(audioPath)
-  audioVals['specCent'] =librosa.feature.spectral_centroid(y=y, sr=sr, n_fft=2048, hop_length=512, freq=None).transpose ()
-
   audioVals['f0'], voiced_flag, audioVals['voiced_probs'] = librosa.pyin(y,
                                               fmin=librosa.note_to_hz('C2'),
                                               fmax=librosa.note_to_hz('C7'))
@@ -34,5 +32,5 @@ features = analyzeAudio(audioPath)
 plotAudioVals(features,audioPath,'pYIN fundamental frequency estimation','f0')
 
 clean_f0 = np.nan_to_num (features['f0'], nan=features['f0mean'])
-print (librosa.hz_to_note (clean_f0))
+print (clean_f0)
 
