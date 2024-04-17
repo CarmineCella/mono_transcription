@@ -52,7 +52,7 @@ def plotAudioVals(audioVals,audioPath,plotTitle,dataName):
   plt.show()
   return
 
-audioPath = 'files/trumpet.wav'
+audioPath = 'files/Vox.wav'
 
 features, sr = analyzeAudio(audioPath)
 plotAudioVals(features,audioPath,'pYIN fundamental frequency estimation','f0')
